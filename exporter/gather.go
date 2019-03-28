@@ -42,9 +42,8 @@ func (e *Exporter) IsService(name string) bool {
 
 func (e *Exporter) IsWhitelistedService(name string) bool {
     for _, v := range e.ServiceWhitelist {
-    	m := v.FindString(name)
-    	if len(m) > 0 {
-			return true
+    	if name == v {
+    		return true
 		}
 	}
     return false

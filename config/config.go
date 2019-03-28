@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	Supervisor string `yaml:"supervisor,omitempty"`
-	ServiceWhitelist []*regexp.Regexp`yaml:"service_whitelist"`
+	ServiceWhitelist []string `yaml:"service_whitelist"`
 	ServiceMetricFQDN string `yaml: "service_metric_fqdn"`
 	PIDCollection    bool `yaml:"enable_pid"`
 	PIDWhitelist []*regexp.Regexp `yaml:"pid_whitelist"`
@@ -31,12 +31,7 @@ func LoadConfig(path string) (config Config, err error){
     	return
 	}
     for _, v := range viper.GetStringSlice("service_whitelist"){
-    	r, err := regexp.Compile(v)
-    	if err != nil {
-    		err = errors.New("one or more whitelist values are not a valid string or regex")
-    		break
-		}
-    	config.ServiceWhitelist = append(config.ServiceWhitelist, r)
+    	config.ServiceWhitelist = append(config.ServiceWhitelist, v)
 	}
 	for _, v := range viper.GetStringSlice("pid_whitelist"){
 		r, err := regexp.Compile(v)
