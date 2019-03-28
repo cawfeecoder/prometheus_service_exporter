@@ -31,7 +31,13 @@ func LoadConfig(path string) (config Config, err error){
     	return
 	}
     for _, v := range viper.GetStringSlice("service_whitelist"){
-    	r, err := regexp.Compile(v)
+    	var r *regexp.Regexp
+    	var err error
+    	if config.Supervisor == "systemd" {
+    		r, err = regexp.Compile(v + ".service")
+		} else {
+			r, err = regexp.Compile(v)
+		}
     	if err != nil {
     		err = errors.New("one or more whitelist values are not a valid string or regex")
     		break
