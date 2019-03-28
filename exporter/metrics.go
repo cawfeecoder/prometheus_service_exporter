@@ -58,7 +58,7 @@ func (e *Exporter) processMetrics(services []*Service, pids []*PidFile, ch chan<
 	}
 
 	for _, y := range pids {
-		parsed_value, err := strconv.ParseFloat(y.PID, 64)
+		parsed_value, err := strconv.ParseFloat(strings.Replace(y.PID, "\n", "", 1), 64)
 		if err != nil {
 			fmt.Printf("Error: %v", err)
 		}
