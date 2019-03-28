@@ -1,0 +1,10 @@
+supervisor: systemd #Type of system supervisor
+service_metric_series_name: common_service_daemon #Metric series name for Services
+pid_metric_series_name: common_service_pid #Metric sereis name for PIDs
+collect_pids: true #Should the collector also collect pids
+targets: #What are we scraping
+- name: "test"#Unifies the target under a "group"
+  daemon_whitelist: [] #Exactly name of the daemon expected.
+  pid_whitelist:
+  - name: "test_pid"#The name of the pid file, without the .pid extension
+    service: "test1"#The name of the associated daemon service

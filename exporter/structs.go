@@ -13,6 +13,7 @@ type Exporter struct {
 
 type Service struct {
 	Name string
+	Group string
 	State string
 	Substate string
 }
@@ -27,5 +28,7 @@ func (s *Service) IsActive() float64 {
 type PidFile struct {
 	Name string
 	State string
+	Service string
 	PID  string
+	Group string
 }

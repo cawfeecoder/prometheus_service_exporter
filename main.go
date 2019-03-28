@@ -33,7 +33,7 @@ func main() {
 		log.Errorln("Config error", err.Error())
 	}
 
-	serviceMets = exporter.AddMetrics(cfg.ServiceMetricFQDN, cfg.PIDCollection, cfg.PIDMetricFQDN)
+	serviceMets = exporter.AddMetrics(cfg.Service_Metric_Series_Name, cfg.Collect_Pids, cfg.Pid_Metric_Series_Name)
 
 	exporter := exporter.Exporter {
 		ServiceMetrics: serviceMets,

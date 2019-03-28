@@ -44,7 +44,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		}
 	}
 
-	if e.Config.PIDCollection {
+	if e.Config.Collect_Pids {
 		var data, err = e.pid()
 
 		if err != nil {

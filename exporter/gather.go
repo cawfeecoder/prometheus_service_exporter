@@ -2,16 +2,14 @@ package exporter
 
 import (
 	"fmt"
-	"os"
+	"github.com/nfrush/prometheus_service_exporter/config"
 	"os/exec"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 var (
-	is_service = regexp.MustCompile(`.service`)
-	is_sysvinit = regexp.MustCompile(`(\S+).*\sis\s(.*[^.])`)
+	isSysvinit = regexp.MustCompile(`(\S+).*\sis\s(.*[^.])`)
 )
 
 func (e *Exporter) GetPIDState(pid string) string {
@@ -34,31 +32,13 @@ func (e *Exporter) DeriveState(state string) string {
 	return "inactive"
 }
 
-func (e *Exporter) IsService(name string) bool {
-	m := is_service.FindAllStringSubmatch(name, 1)
-	if len(m) > 0 {
-		return true
-	}
-	return false
-}
-
-func (e *Exporter) IsWhitelistedService(name string) bool {
-    for _, v := range e.ServiceWhitelist {
-    	if name == v {
+func (e *Exporter) IsWhitelistedService(name string, target_group config.TargetGroup) bool {
+    for _, v := range target_group.Daemon_Whitelist {
+    	if name == v || name == v + ".service" {
     		return true
 		}
 	}
     return false
-}
-
-func (e *Exporter) IsWhitelistedPID(name string) bool {
-	pidfile_name := strings.Split(name, "/")
-	for _, v := range e.PIDWhitelist {
-		if pidfile_name[len(pidfile_name) - 1] == v + ".pid" {
-			return true
-		}
-	}
-	return false
 }
 
 func (e *Exporter) sysvinit() ([]*Service, error){
@@ -72,20 +52,21 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	}
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines {
-		m := is_sysvinit.FindStringSubmatch(v)
+		m := isSysvinit.FindStringSubmatch(v)
 		if len(m) == 3 {
-			if e.IsWhitelistedService(m[1]) {
-				service := &Service{Name: m[1], State: e.DeriveState(m[2]), Substate: m[2]}
-				services = append(services, service)
+			for _, target_group := range e.Targets {
+				if e.IsWhitelistedService(m[1], target_group) {
+					service := &Service{Name: m[1], State: e.DeriveState(m[2]), Substate: m[2], Group: target_group.Name}
+					services = append(services, service)
+				}
 			}
 		}
 	}
 	return services, nil
 }
 
-func (e *Exporter) systemd() ([]*Service, error){
-
-	services := []*Service{}
+func (e *Exporter) systemd() (services []*Service, err error){
+	services = []*Service{}
 
 	cmd := exec.Command("systemctl", "list-units", "--all")
 	output, err := cmd.CombinedOutput()
@@ -95,38 +76,33 @@ func (e *Exporter) systemd() ([]*Service, error){
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines[1:len(lines) - 8] {
 		parts := strings.Fields(v)
-		if e.IsWhitelistedService(parts[0]) && e.IsService(parts[0]) {
-			service := &Service{Name: parts[0], State: parts[2], Substate: parts[3]}
-			services = append(services, service)
+		for _, target_group := range e.Targets {
+			if e.IsWhitelistedService(parts[0], target_group) {
+				service := &Service{Name: parts[0], State: parts[2], Substate: parts[3], Group: target_group.Name}
+				services = append(services, service)
+			}
 		}
 	}
 	return services, nil
 }
 
-func (e *Exporter) pid() ([]*PidFile, error) {
+func (e *Exporter) pid() (pids []*PidFile, err error) {
+	pids = []*PidFile{}
 
-	pids := []*PidFile{}
-
-	files := []string{}
-
-	err := filepath.Walk("/var/run/", func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == ".pid" {
-			files = append(files, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return pids, err
-	}
-
-	for _, file := range files {
-		cmd := exec.Command("cat", file)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			break
-		}
-		if e.IsWhitelistedPID(file) {
-			pid := &PidFile{Name: file, PID: string(output), State: e.GetPIDState(string(output))}
+	for _, target_group := range e.Targets {
+		for _, filename := range target_group.Pid_Whitelist {
+			cmd := exec.Command("cat", fmt.Sprintf("/var/run/%s.pid", filename.Name))
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				continue
+			}
+			pid := &PidFile{
+				Name: fmt.Sprintf("%s.pid", filename.Name),
+				PID: string(output),
+				State: e.GetPIDState(string(output)),
+				Service: filename.Service,
+				Group: target_group.Name,
+			}
 			pids = append(pids, pid)
 		}
 	}
