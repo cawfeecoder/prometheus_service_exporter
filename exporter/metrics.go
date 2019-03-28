@@ -54,13 +54,17 @@ func AddMetrics(service_fqdn string, pid_enabled bool, pid_fqdn string) map[stri
 
 func (e *Exporter) processMetrics(services []*Service, pids []*PidFile, ch chan<- prometheus.Metric) error {
 	for _, x := range services {
-		fmt.Printf("Service: %v", x)
+		fmt.Printf("Service Name: %v", x.Name)
+		fmt.Printf("Service Active? %v", x.IsActive())
+		fmt.Printf("Service Substate: %v", x.Substate)
 		ch <- prometheus.MustNewConstMetric(e.ServiceMetrics["State"], prometheus.GaugeValue, x.IsActive(), x.Name, x.Substate)
 	}
 
 	for _, y := range pids {
 		parsed_value, err := strconv.ParseFloat(y.PID, 64)
-		fmt.Printf("PID: %v", y)
+		fmt.Printf("PID Name: %v", y.Name)
+		fmt.Printf("PID Value: %v", parsed_value)
+		fmt.Printf("PID State: %v", y.State)
 		if err == nil {
 		    ch <- prometheus.MustNewConstMetric(e.ServiceMetrics["PID"], prometheus.GaugeValue, parsed_value, y.Name, y.State)
 		}
