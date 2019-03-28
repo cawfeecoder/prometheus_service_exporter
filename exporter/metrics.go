@@ -61,6 +61,7 @@ func (e *Exporter) processMetrics(services []*Service, pids []*PidFile, ch chan<
 		parsed_value, err := strconv.ParseFloat(y.PID, 64)
 		fmt.Printf("PID Name: %v", y.Name)
 		fmt.Printf("PID Value: %v", parsed_value)
+		fmt.Printf("PID Unprased: %v", y.PID)
 		fmt.Printf("PID State: %v", y.State)
 		if err == nil {
 		    ch <- prometheus.MustNewConstMetric(e.ServiceMetrics["PID"], prometheus.GaugeValue, parsed_value, y.Name, y.State)
