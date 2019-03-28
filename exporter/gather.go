@@ -11,7 +11,7 @@ import (
 
 var (
 	is_service = regexp.MustCompile(`.service`)
-	is_sysvinit = regexp.MustCompile(`(.*)([(].*[)]){0,}\sis\s(.*)`)
+	is_sysvinit = regexp.MustCompile(`(\S+).*\sis\s(.*[^.])`)
 )
 
 func (e *Exporter) GetPIDState(pid string) string {
@@ -75,14 +75,9 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 		m := is_sysvinit.FindStringSubmatch(v)
 		fmt.Printf("Matches: %v\n", m)
 		fmt.Printf("Line: %v\n", v)
-		if len(m) > 3 {
+		if len(m) == 2 {
 			if e.IsWhitelistedService(m[0]) {
-				var service *Service
-				if len(m) == 3 {
-					service = &Service{Name: m[0], State: e.DeriveState(m[1]), Substate: m[2]}
-				} else {
-					service = &Service{Name: m[0], State: e.DeriveState(m[2]), Substate: m[3]}
-				}
+				service := &Service{Name: m[0], State: e.DeriveState(m[1]), Substate: m[1]}
 				services = append(services, service)
 			}
 		}
