@@ -72,12 +72,10 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	}
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines {
+		pm := is_sysvinit.FindString(v)
+		fmt.Println("%v", pm)
 		m := is_sysvinit.FindStringSubmatch(v)
 		if len(m) == 3 {
-			fmt.Printf("Matches: %v\n", m)
-			fmt.Printf("%v", m[1])
-			fmt.Printf("%v", m[2])
-			fmt.Printf("Line: %v\n", v)
 			if e.IsWhitelistedService(m[0]) {
 				service := &Service{Name: m[1], State: e.DeriveState(m[2]), Substate: m[2]}
 				services = append(services, service)
