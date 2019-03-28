@@ -15,10 +15,7 @@ var (
 
 func (e *Exporter) GetPIDState(pid string) string {
 	cmd := exec.Command("ps", "-p", pid)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "dead"
-	}
+	output, _ := cmd.CombinedOutput()
 	if len(output) > 1 {
 		return "alive"
 	}
