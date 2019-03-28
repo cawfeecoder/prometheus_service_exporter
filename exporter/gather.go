@@ -72,10 +72,11 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines {
 		m := is_sysvinit.FindAllString(v, 1)
+		print("Matches: %v", m)
+		print("Line: %v", v)
 		if len(m) > 3 {
 			if e.IsWhitelistedService(m[0]) {
 				var service *Service
-				print("Matches: %v", m)
 				if len(m) == 3 {
 					service = &Service{Name: m[0], State: e.DeriveState(m[1]), Substate: m[2]}
 				} else {
