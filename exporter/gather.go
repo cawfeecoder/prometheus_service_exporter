@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -72,8 +73,8 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines {
 		m := is_sysvinit.FindAllString(v, 1)
-		print("Matches: %v", m)
-		print("Line: %v", v)
+		fmt.Printf("Matches: %v\n", m)
+		fmt.Printf("Line: %v\n", v)
 		if len(m) > 3 {
 			if e.IsWhitelistedService(m[0]) {
 				var service *Service
