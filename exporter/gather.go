@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +16,11 @@ var (
 
 func (e *Exporter) GetPIDState(pid string) string {
 	cmd := exec.Command("ps", "-p", pid)
-	output, _ := cmd.CombinedOutput()
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("ERROR: %v", err)
+		return "dead"
+	}
 	if len(output) > 1 {
 		return "alive"
 	}
