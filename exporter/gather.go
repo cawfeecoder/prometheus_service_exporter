@@ -72,7 +72,7 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	}
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines {
-		m := is_sysvinit.FindAllString(v, 1)
+		m := is_sysvinit.FindStringSubmatch(v)
 		fmt.Printf("Matches: %v\n", m)
 		fmt.Printf("Line: %v\n", v)
 		if len(m) > 3 {
