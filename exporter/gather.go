@@ -127,7 +127,7 @@ func (e *Exporter) pid() ([]*PidFile, error) {
 		cmd := exec.Command("cat", file)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return pids, err
+			break
 		}
 		if e.IsWhitelistedPID(file) {
 			pid := &PidFile{Name: file, PID: string(output), State: e.GetPIDState(string(output))}
@@ -135,5 +135,5 @@ func (e *Exporter) pid() ([]*PidFile, error) {
 		}
 	}
 
-	return pids, nil
+	return pids, err
 }
