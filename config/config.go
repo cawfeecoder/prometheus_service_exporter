@@ -36,7 +36,7 @@ func LoadConfig(path string) (config Config, err error){
     	if config.Supervisor == "systemd" {
     		r, err = regexp.Compile(v + ".service")
 		} else {
-			r, err = regexp.Compile(v)
+			r, err = regexp.Compile("\b" + v + "\b")
 		}
     	if err != nil {
     		err = errors.New("one or more whitelist values are not a valid string or regex")
