@@ -73,11 +73,13 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	lines := strings.Split(string(output), "\n")
 	for _, v := range lines {
 		m := is_sysvinit.FindStringSubmatch(v)
-		fmt.Printf("Matches: %v\n", m)
-		fmt.Printf("Line: %v\n", v)
-		if len(m) == 2 {
+		if len(m) == 3 {
+			fmt.Printf("Matches: %v\n", m)
+			fmt.Printf("%v", m[1])
+			fmt.Printf("%v", m[2])
+			fmt.Printf("Line: %v\n", v)
 			if e.IsWhitelistedService(m[0]) {
-				service := &Service{Name: m[0], State: e.DeriveState(m[1]), Substate: m[1]}
+				service := &Service{Name: m[1], State: e.DeriveState(m[2]), Substate: m[2]}
 				services = append(services, service)
 			}
 		}
