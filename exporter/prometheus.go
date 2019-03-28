@@ -28,6 +28,22 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		}
 	}
 
+	if e.Config.Supervisor == "sysvinit" {
+		var data, err = e.sysvinit()
+
+		if err != nil {
+			log.Errorf("Error gathering service metrics: %v", err)
+			return
+		}
+
+		err = e.processMetrics(data, nil, ch)
+
+		if err != nil {
+			log.Error("Error processing service metrics: %v", err)
+			return
+		}
+	}
+
 	if e.Config.PIDCollection {
 		var data, err = e.pid()
 

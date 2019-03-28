@@ -10,6 +10,7 @@ import (
 
 var (
 	is_service = regexp.MustCompile(`.service`)
+	is_sysvinit = regexp.MustCompile(`(.*)([(].*[)]){0,}\sis\s(.*)`)
 )
 
 func (e *Exporter) GetPIDState(pid string) string {
@@ -22,6 +23,13 @@ func (e *Exporter) GetPIDState(pid string) string {
 		return "alive"
 	}
 	return "dead"
+}
+
+func (e *Exporter) DeriveState(state string) string {
+	if state == "running" {
+		return "active"
+	}
+	return "inactive"
 }
 
 func (e *Exporter) IsService(name string) bool {
@@ -50,6 +58,33 @@ func (e *Exporter) IsWhitelistedPID(name string) bool {
 		}
 	}
 	return false
+}
+
+func (e *Exporter) sysvinit() ([]*Service, error){
+
+	services := []*Service{}
+
+	cmd := exec.Command("service", "--status-all")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return services, err
+	}
+	lines := strings.Split(string(output), "\n")
+	for _, v := range lines {
+		m := is_sysvinit.FindAllString(v, 1)
+		if len(m) > 3 {
+			if e.IsWhitelistedService(m[0]) {
+				var service *Service
+				if len(m) == 3 {
+					service = &Service{Name: m[0], State: e.DeriveState(m[1]), Substate: m[2]}
+				} else {
+					service = &Service{Name: m[0], State: e.DeriveState(m[2]), Substate: m[3]}
+				}
+				services = append(services, service)
+			}
+		}
+	}
+	return services, nil
 }
 
 func (e *Exporter) systemd() ([]*Service, error){
