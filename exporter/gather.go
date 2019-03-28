@@ -73,7 +73,7 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 	for _, v := range lines {
 		m := is_sysvinit.FindStringSubmatch(v)
 		if len(m) == 3 {
-			if e.IsWhitelistedService(m[0]) {
+			if e.IsWhitelistedService(m[1]) {
 				service := &Service{Name: m[1], State: e.DeriveState(m[2]), Substate: m[2]}
 				services = append(services, service)
 			}
