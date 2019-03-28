@@ -75,6 +75,7 @@ func (e *Exporter) sysvinit() ([]*Service, error){
 		if len(m) > 3 {
 			if e.IsWhitelistedService(m[0]) {
 				var service *Service
+				print("Matches: %v", m)
 				if len(m) == 3 {
 					service = &Service{Name: m[0], State: e.DeriveState(m[1]), Substate: m[2]}
 				} else {
