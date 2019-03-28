@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/nfrush/prometheus_service_exporter/config"
 	"github.com/nfrush/prometheus_service_exporter/exporter"
 	"github.com/prometheus/client_golang/prometheus"
@@ -40,8 +39,6 @@ func main() {
 		ServiceMetrics: serviceMets,
 		Config: cfg,
 	}
-
-	fmt.Printf("Config: %v", cfg)
 
 	prometheus.MustRegister(&exporter)
 

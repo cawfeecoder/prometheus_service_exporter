@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"strconv"
 	"strings"
@@ -53,11 +54,13 @@ func AddMetrics(service_fqdn string, pid_enabled bool, pid_fqdn string) map[stri
 
 func (e *Exporter) processMetrics(services []*Service, pids []*PidFile, ch chan<- prometheus.Metric) error {
 	for _, x := range services {
+		fmt.Printf("Service: %v", x)
 		ch <- prometheus.MustNewConstMetric(e.ServiceMetrics["State"], prometheus.GaugeValue, x.IsActive(), x.Name, x.Substate)
 	}
 
 	for _, y := range pids {
 		parsed_value, err := strconv.ParseFloat(y.PID, 64)
+		fmt.Printf("PID: %v", y)
 		if err == nil {
 		    ch <- prometheus.MustNewConstMetric(e.ServiceMetrics["PID"], prometheus.GaugeValue, parsed_value, y.Name, y.State)
 		}
