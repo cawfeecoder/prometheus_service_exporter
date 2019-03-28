@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"github.com/spf13/viper"
-	"regexp"
 )
 
 type Config struct {
@@ -11,7 +10,7 @@ type Config struct {
 	ServiceWhitelist []string `yaml:"service_whitelist"`
 	ServiceMetricFQDN string `yaml: "service_metric_fqdn"`
 	PIDCollection    bool `yaml:"enable_pid"`
-	PIDWhitelist []*regexp.Regexp `yaml:"pid_whitelist"`
+	PIDWhitelist []string `yaml:"pid_whitelist"`
 	PIDMetricFQDN string `yaml: "pid_metric_fqdn"`
 }
 
@@ -34,12 +33,7 @@ func LoadConfig(path string) (config Config, err error){
     	config.ServiceWhitelist = append(config.ServiceWhitelist, v)
 	}
 	for _, v := range viper.GetStringSlice("pid_whitelist"){
-		r, err := regexp.Compile(v)
-		if err != nil {
-			err = errors.New("one or more whitelist values are not a valid string or regex")
-			break
-		}
-		config.PIDWhitelist = append(config.PIDWhitelist, r)
+		config.PIDWhitelist = append(config.PIDWhitelist, v)
 	}
     if err != nil {
     	return

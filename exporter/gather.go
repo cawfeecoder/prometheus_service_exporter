@@ -15,7 +15,7 @@ var (
 )
 
 func (e *Exporter) GetPIDState(pid string) string {
-	cmd := exec.Command("ps", "-p", pid)
+	cmd := exec.Command("/bin/sh", "-c", "ps -p " + pid)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("ERROR: %v", err)
@@ -52,9 +52,9 @@ func (e *Exporter) IsWhitelistedService(name string) bool {
 }
 
 func (e *Exporter) IsWhitelistedPID(name string) bool {
+	pidfile_name := strings.Split(name, "/")
 	for _, v := range e.PIDWhitelist {
-		m := v.FindAllStringSubmatch(name, 1)
-		if len(m) > 0 {
+		if pidfile_name[len(pidfile_name) - 1] == v + ".pid" {
 			return true
 		}
 	}
